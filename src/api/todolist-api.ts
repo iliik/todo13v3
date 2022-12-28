@@ -6,6 +6,11 @@ export const settings = {
         "API-KEY": "45e010e4-6515-4f44-948c-de88f0fc6daf"
     }
 }
+
+const instans = axios.create({
+    baseURL: "https://social-network.samuraijs.com/api/1.0/",
+    ...settings
+})
 export type TodolistType = {
     id: string
     title: string
@@ -13,33 +18,59 @@ export type TodolistType = {
     order: number
 }
 
-type ResponseType<D> = {
+type ResponseType<D = {}> = {
     resultCode: number
     messages: Array<string>
     data: D
 }
 
+export type TasksType = {
+    description: string
+    title: string
+    status: number
+    priority: number
+    startDate: string
+    deadline: string
+    id: string
+    todolistId: string
+    order: number
+    addedDate: string
+}
+type GetTasksResponse = {
+    totalCount: number
+    error: string | null
+    items: TasksType[]
+}
+
+export type UpdateTaskType={
+    description: string
+    title: string
+    status: number
+    priority: number
+    startDate: string
+    deadline: string
+}
+
 
 export const todolistAPI = {
     getTodolist() {
-        const promise =
-            axios.get<TodolistType[]>("https://social-network.samuraijs.com/api/1.0/todo-lists", settings)
-        return promise
+        return instans.get<TodolistType[]>("todo-lists")
     },
     createTodolist(title: string) {
-        const promise =
-            axios.post<ResponseType<{ item: TodolistType }>>("https://social-network.samuraijs.com/api/1.0/todo-lists", {title: title}, settings)
-        return promise
+        return instans.post<ResponseType<{ item: TodolistType }>>("todo-lists", {title: title})
     },
     deleteTodolist(todolistId: string) {
-        const promise =
-            axios.delete<ResponseType<{}>>(`https://social-network.samuraijs.com/api/1.0/todo-lists/${todolistId}`, settings)
-        return promise
+        return instans.delete<ResponseType>(`todo-lists/${todolistId}`)
     },
     updateTodolist(id: string, title: string) {
-        const promise =
-            axios.put<ResponseType<{}>>(`https://social-network.samuraijs.com/api/1.0/todo-lists${id}`, {title: title}, settings)
-        return promise
+        return instans.put<ResponseType>(`todo-lists${id}`, {title: title})
+
+    },
+    getTasks(todolistId: string) {
+        return instans.get<GetTasksResponse>(`todo-lists/${todolistId}/tasks`)
+    },
+    deleteTask(todolistId: string, taskId: string) {
+        return instans.delete<ResponseType>(`todo-lists/${todolistId}/tasks${taskId}`)
     }
 
 }
